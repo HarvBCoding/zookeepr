@@ -47,6 +47,11 @@ function filterByQuery(query, animalsArray) {
     return filteredResults;
 }
 
+function findById(id, animalsArray) {
+    const result = animalsArray.filter(animal => animal.id === id)[0];
+    return result;
+}
+
 // the get() method requires 2 arguments; the first is a string that describes the route the client will have to fetch from
 // the second is a callback function that will execute every time that route is accessed w/ a GET request
 app.get('/api/animals', (req, res) => {
@@ -62,6 +67,17 @@ app.get('/api/animals', (req, res) => {
     // the json() method from the res(response) to send the string
     res.json(results);
 
+});
+
+app.get('/api/animals/:id', (req, res) => {
+
+    // the req object also has a params property [req.params]; the param object needs to be defines in the route path
+    const result = findById(req.params.id, animals);
+    if (result) {
+        res.json(result);
+    } else {
+        res.send(404);
+    }
 });
 
 app.listen(PORT, () => {
