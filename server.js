@@ -1,6 +1,10 @@
 const express = require('express');
 const { animals } = require('./data/animals.json');
 
+// when heroku runs it sets an environment variable called process.env.PORT
+// this is telling our app to use that port if it's been set
+const PORT = process.env.PORT || 3001;
+
 // to represent the server; assign express() to the app variable so that methods can be chained to the Express.js server
 const app = express();
 
@@ -60,6 +64,6 @@ app.get('/api/animals', (req, res) => {
 
 });
 
-app.listen(3001, () => {
-    console.log(`API server now on port 3001!`);
+app.listen(PORT, () => {
+    console.log(`API server now on port ${PORT}!`);
 });
