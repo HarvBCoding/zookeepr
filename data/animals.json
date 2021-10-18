@@ -119,11 +119,11 @@
       "id": "11"
     },
     {
-      "name": "Larry",
-      "species": "lemur",
-      "diet": "",
+      "name": "Ashley",
+      "species": "elephant",
+      "diet": "herbivore",
       "personalityTraits": [
-        "hungry"
+        "hungry, silly"
       ],
       "id": "12"
     }
