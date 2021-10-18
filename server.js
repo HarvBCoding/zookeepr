@@ -1,5 +1,7 @@
 const express = require('express');
 const { animals } = require('./data/animals.json');
+const fs = require('fs');
+const path = require('path');
 
 // when heroku runs it sets an environment variable called process.env.PORT
 // this is telling our app to use that port if it's been set
@@ -7,6 +9,14 @@ const PORT = process.env.PORT || 3001;
 
 // to represent the server; assign express() to the app variable so that methods can be chained to the Express.js server
 const app = express();
+
+// app.use() method that mounts a function to the server that requests will pass thru before getting to the intender endpoint
+// express.urlencoded({ extended: true }) is a method that takes incoming POST data & converts it to key/value pairings that can be accessed in the req.body object
+// parse incoming string or array data
+app.use(express.urlencoded({ extended: true}));
+// express.json() takes incoming POST data in the form of JSON & parses it into the req.body
+// parse incoming JSON data
+app.use(express.json());
 
 // this function will extract data from after the question mark; taking req.query as an argument
 // and filter through the animals accordingly, returning a new filtered array 
@@ -52,6 +62,41 @@ function findById(id, animalsArray) {
     return result;
 }
 
+// function accept the POST route's req.body value & the array to add the data to
+function createNewAnimal(body, animalsArray) {
+    // the function's main code will go here
+    const animal = body;
+    animalsArray.push(animal);
+    // the fs.writeFileSync() method is the synchronous version of fs.writeFile()
+    fs.writeFileSync(
+        // write to the animals.json file and use the path.join() method to join the value of __dirname
+        // dirname represents the directory of the file the code is executed in
+        path.join(__dirname, './data/animals.json'),
+        // use stringify to convert the JS array data; the arguments null & 2 are means of keeping the data formatted
+        // null means none of the existing data can be edited, the 2 is to create whitespace btw the values for readability
+        JSON.stringify({ animals: animalsArray }, null, 2)
+    );
+
+    // return finished code to post route for response
+    return animal;
+}
+
+function validateAnimal(animal) {
+    if (!animal.name || typeof animal.name !== 'string') {
+        return false;
+    }
+    if (!animal.species || typeof animal.species !== 'string') {
+        return false;
+    }
+    if (!animal.diet || typeof animal.diet!== 'string') {
+        return false;
+    }
+    if (!animal.personalityTraits || !Array.isArray(animal.personalityTraits)) {
+        return false;
+    }
+    return true;
+}
+
 // the get() method requires 2 arguments; the first is a string that describes the route the client will have to fetch from
 // the second is a callback function that will execute every time that route is accessed w/ a GET request
 app.get('/api/animals', (req, res) => {
@@ -73,10 +118,31 @@ app.get('/api/animals/:id', (req, res) => {
 
     // the req object also has a params property [req.params]; the param object needs to be defines in the route path
     const result = findById(req.params.id, animals);
+
+    // if the findById function found something, then return the result
     if (result) {
         res.json(result);
     } else {
+        // otherwise send a 404 error to let the client know their request could not be found
         res.send(404);
+    }
+});
+
+// w/ post requests the data can be packaged, usually as an object & send it to the server
+app.post('/api/animals', (req, res) => {
+    // set animal id based on what the next index of the array will be
+    req.body.id = animals.length.toString();
+
+    // if any data in req.body is incorrect, send 400 error back
+    if(!validateAnimal(req.body)) {
+        res.status(400).send('The animal is not properly formatted.');
+    } else {
+
+        // add animal to json file & animals array in this function
+        const animal = createNewAnimal(req.body, animals);
+
+        // req.body is where our incoming content will be so it's accessible & do something w/ it
+        res.json(animal);
     }
 });
 
