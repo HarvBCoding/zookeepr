@@ -17,6 +17,9 @@ app.use(express.urlencoded({ extended: true}));
 // express.json() takes incoming POST data in the form of JSON & parses it into the req.body
 // parse incoming JSON data
 app.use(express.json());
+// instructs the server to make files(in public directory) readily available
+// the express.static() method takes the provided path to a location w/in the app and instructs the server to make the files static resources
+app.use(express.static('public'));
 
 // this function will extract data from after the question mark; taking req.query as an argument
 // and filter through the animals accordingly, returning a new filtered array 
@@ -144,6 +147,28 @@ app.post('/api/animals', (req, res) => {
         // req.body is where our incoming content will be so it's accessible & do something w/ it
         res.json(animal);
     }
+});
+
+// this GET route's ONLY job is to respond w/ an HTML page to display in the browser
+app.get('/', (req, res) => {
+    // res.sendFile() tells the GET router where to find the file the server needs to read and send back
+    res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+// GET route will respond w/ the animal's html page
+app.get('/animals', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+
+// GET route will respond w/ the zookeepers html page
+app.get('/zookeepers', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/zookeepers.html'));
+});
+
+// the * will act as a wildcard, meaning any route that wasn't previously defined will fall under this
+// and will receive the home page as a response
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
 app.listen(PORT, () => {
